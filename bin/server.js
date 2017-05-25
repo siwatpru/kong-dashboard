@@ -14,11 +14,23 @@ var url_parser = require('url');
 
 var name = process.env['kong-dashboard-name'];
 var pass = process.env['kong-dashboard-pass'];
+var url = process.env['kong-dashboard-url'];
 
 /////////////////////////
 // Serving angular app //
 /////////////////////////
 var webapp = koa();
+
+// Automatically set config.url in cookie
+if (url) {
+  webapp.use(function *(next){
+    var encodedServerUrl = encodeURI('"' + url + '"')
+    this.cookies.set('config.url', encodedServerUrl, {
+      httpOnly: false
+    });
+    yield next;
+  })
+}
 
 // Middleware adding response headers
 webapp.use(function *(next){
